@@ -1,0 +1,6 @@
+SETTING(do_gas, 1,)
+SETTING(foo, 314u)
+SETTING(bar, 12345ll)
+SETTING(file, (char[VAL_LEN]){""})
+SETTING(dd,3.14159d)
+SETTING(test, 1.57f)
