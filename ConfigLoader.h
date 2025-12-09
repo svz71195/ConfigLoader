@@ -6,6 +6,6 @@ typedef struct {
     #undef SETTING
 } Config_t;
 
-// void InitConfig(Config_t* c);
+void InitConfig(Config_t* c, const char* configfile);
 
 // void ConfigReader(Config_t* c, const char *file, void (*func)(const char*));

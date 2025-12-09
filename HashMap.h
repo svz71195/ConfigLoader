@@ -4,7 +4,7 @@
 
 #define KEY_LEN 32
 #define VAL_LEN 128
-#define INITIAL_CAPACITY 64
+#define INITIAL_CAPACITY 32
 #define FILL_FACTOR 0.75
 
 // typedef enum
@@ -40,10 +40,11 @@ typedef struct
 } HashMap_t;
 
 
-int map_init(HashMap_t* m);
+int map_init(HashMap_t* m[static 1], size_t capacity);
 void map_free(HashMap_t* m);
 // int map_set(HashMap_t* m, const char* key, ValueType type, ValueData val);
 int map_set(HashMap_t* m, const char* key, const char* val);
 Entry_t* map_get(HashMap_t* m, const char* key);
 int map_delete(HashMap_t* m, const char* key);
+void map_print(HashMap_t* m);
 
