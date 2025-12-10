@@ -1,9 +1,9 @@
-#include "ConfigLoader.h"
-#include "HashMap.h"
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
 
+#include "ConfigLoader.h"
+#include "HashMap.h"
 
 
 HashMap_t* ReadConfigFile(const char *file)
@@ -235,7 +235,7 @@ static int _ValToString(HashMap_t *m, const char *key, char **result)
     return 1;
 }
 
-void printConfig(Config_t *c)
+void PrintConfig(Config_t *c)
 {
     if (!c) { return; }
 
@@ -292,6 +292,6 @@ int main(int argc, char **argv)
     Config_t settings;
     printf("argv[1] = %s\n", argv[1]);
     InitConfig(&settings, argv[1]);
-    printConfig(&settings);
+    PrintConfig(&settings);
     return 0;
 }
