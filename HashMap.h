@@ -28,6 +28,7 @@ typedef struct
 	// ValueType type;
 	char value[VAL_LEN];
 	int in_use;
+
 } Entry_t;
 
 
@@ -43,7 +44,7 @@ typedef struct
 int map_init(HashMap_t* m[static 1], size_t capacity);
 void map_free(HashMap_t* m);
 // int map_set(HashMap_t* m, const char* key, ValueType type, ValueData val);
-int map_set(HashMap_t* m, const char* key, const char* val);
+int map_set(HashMap_t* handle[static 1], const char* key, const char* val);
 Entry_t* map_get(HashMap_t* m, const char* key);
 int map_delete(HashMap_t* m, const char* key);
 void map_print(HashMap_t* m);
