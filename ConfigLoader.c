@@ -51,7 +51,7 @@ HashMap_t* ReadConfigFile(const char *file)
             // fclose(fd);
             // exit(123);
         }
-        map_set(m, key, value);
+        map_set(&m, key, value);
     }
     fclose(fd);
     return m;
@@ -68,7 +68,7 @@ static int _ValToInt(HashMap_t *m, const char *key, int *result)
     if(!e) {
         printf("Failed\n");
         fflush(stdout);
-        return 1;
+        return 0;
     }
 
     if(e->value[0] == '\0') { return 1; }
@@ -76,11 +76,36 @@ static int _ValToInt(HashMap_t *m, const char *key, int *result)
     *result = strtol(e->value, &endptr, 10);
 
     if((*endptr) != 0)
-        return 1; /* did not parse entire string */
+        return 0; /* did not parse entire string */
 
     printf("Success\n");
     fflush(stdout);
-    return 0;
+    return 1;
+}
+
+static int _ValToUnsignedInt(HashMap_t *m, const char *key, unsigned int *result)
+{
+    printf("Get key <%s> ...", key);
+    fflush(stdout);
+    Entry_t *e = map_get(m, key);
+    char *endptr;
+
+    if(!e) {
+        printf("Failed\n");
+        fflush(stdout);
+        return 0;
+    }
+
+    if(e->value[0] == '\0') { return 1; }
+
+    *result = strtoul(e->value, &endptr, 10);
+
+    if((*endptr) != 0)
+        return 0; /* did not parse entire string */
+
+    printf("Success\n");
+    fflush(stdout);
+    return 1;
 }
 
 static int _ValToLongLong(HashMap_t *m, const char *key, long long *result)
@@ -93,7 +118,7 @@ static int _ValToLongLong(HashMap_t *m, const char *key, long long *result)
     if(!e) {
         printf("Failed\n");
         fflush(stdout);
-        return 1;
+        return 0;
     }
 
     if(e->value[0] == '\0') { return 1; }
@@ -101,11 +126,36 @@ static int _ValToLongLong(HashMap_t *m, const char *key, long long *result)
     *result = strtoll(e->value, &endptr, 10);
 
     if((*endptr) != 0)
-        return 1; /* did not parse entire string */
+        return 0; /* did not parse entire string */
 
     printf("Success\n");
     fflush(stdout);
-    return 0;
+    return 1;
+}
+
+static int _ValToUnsignedLongLong(HashMap_t *m, const char *key, unsigned long long *result)
+{
+    printf("Get key <%s> ...", key);
+    fflush(stdout);
+    Entry_t *e = map_get(m, key);
+    char *endptr;
+
+    if(!e) {
+        printf("Failed\n");
+        fflush(stdout);
+        return 0;
+    }
+
+    if(e->value[0] == '\0') { return 1; }
+
+    *result = strtoull(e->value, &endptr, 10);
+
+    if((*endptr) != 0)
+        return 0; /* did not parse entire string */
+
+    printf("Success\n");
+    fflush(stdout);
+    return 1;
 }
 
 static int _ValToFloat(HashMap_t *m, const char *key, float *result)
@@ -118,7 +168,7 @@ static int _ValToFloat(HashMap_t *m, const char *key, float *result)
     if(!e) {
         printf("Failed\n");
         fflush(stdout);
-        return 1;
+        return 0;
     }
 
     if(e->value[0] == '\0') { return 1; }
@@ -126,11 +176,11 @@ static int _ValToFloat(HashMap_t *m, const char *key, float *result)
     *result = strtof(e->value, &endptr);
 
     if((*endptr) != 0)
-        return 1; /* did not parse entire string */
+        return 0; /* did not parse entire string */
 
     printf("Success\n");
     fflush(stdout);
-    return 0;
+    return 1;
 }
 
 static int _ValToDouble(HashMap_t *m, const char *key, double *result)
@@ -143,7 +193,7 @@ static int _ValToDouble(HashMap_t *m, const char *key, double *result)
     if(!e) {
         printf("Failed\n");
         fflush(stdout);
-        return 1;
+        return 0;
     }
 
     if(e->value[0] == '\0') { return 1; }
@@ -151,11 +201,11 @@ static int _ValToDouble(HashMap_t *m, const char *key, double *result)
     *result = strtod(e->value, &endptr);
 
     if((*endptr) != 0)
-        return 1; /* did not parse entire string */
+        return 0; /* did not parse entire string */
 
     printf("Success\n");
     fflush(stdout);
-    return 0;
+    return 1;
 }
 
 static int _ValToString(HashMap_t *m, const char *key, char **result)
@@ -167,39 +217,66 @@ static int _ValToString(HashMap_t *m, const char *key, char **result)
     if(!e) {
         printf("Failed\n");
         fflush(stdout);
-        return 1;
+        return 0;
     }
 
     // if(e->value[0] == '\0') { return 1; }
+    *result = realloc(*result, VAL_LEN);
+    if (!(*result)) {
+        printf("Failed\n");
+        fflush(stdout);
+        return 0;
+    }
 
     strncpy(*result, e->value, VAL_LEN);
     printf("Success\n");
     fflush(stdout);
 
-    return 0;
+    return 1;
+}
+
+void printConfig(Config_t *c)
+{
+    if (!c) { return; }
+
+    #define SETTING(STR, DEF)                   \
+    printf(                                     \
+        _Generic((DEF),                         \
+            int:                "'%*s' %d\n",   \
+            unsigned int:       "'%*s' %u\n",   \
+            long long:          "'%*s' %lld\n", \
+            unsigned long long: "'%*s' %llu\n", \
+            float:              "'%*s' %f\n",   \
+            double:             "'%*s' %f\n",   \
+            default:            "'%*s' %s\n"    \
+        ) , KEY_LEN, #STR, c->STR);
+
+    #include "Settings.def"
+    #undef SETTING
+    fflush(stdout);
 }
 
 
 void InitConfig(Config_t *c, const char *configFile)
 {
-    // printf("Reading File...");
-    // fflush(stdout);
+    // Intermediate structure to store key/vlaue pairs
     HashMap_t *m = ReadConfigFile(configFile);
     map_print(m);
-    // printf("Success\n");
-    // fflush(stdout);
 
-    #define SETTING(STR, DEFAULT)               \
-        if(!                                    \
-        _Generic((DEFAULT),                     \
-            int:                _ValToInt,      \
-            unsigned int:       _ValToInt,      \
-            float:              _ValToFloat,    \
-            long long:          _ValToLongLong, \
-            unsigned long long: _ValToLongLong, \
-            double:             _ValToDouble,   \
-            default:            _ValToString    \
-        ) (m, #STR, &(c->STR)) )                \
+    // Conversion of char* value to expected type based
+    // on type of the default value in 'Settings.def'
+    // Only searches for the values defined in 'Settings.def'
+    #define SETTING(STR, DEFAULT)                       \
+        if(!                                            \
+        _Generic((DEFAULT),                             \
+            int:                _ValToInt,              \
+            unsigned int:       _ValToUnsignedInt,      \
+            float:              _ValToFloat,            \
+            long long:          _ValToLongLong,         \
+            unsigned long long: _ValToUnsignedLongLong, \
+            double:             _ValToDouble,           \
+            default:            _ValToString            \
+        ) (m, #STR, &(c->STR)) )                        \
         (c->STR) = DEFAULT; 
 
     #include "Settings.def"
@@ -215,5 +292,6 @@ int main(int argc, char **argv)
     Config_t settings;
     printf("argv[1] = %s\n", argv[1]);
     InitConfig(&settings, argv[1]);
+    printConfig(&settings);
     return 0;
 }
