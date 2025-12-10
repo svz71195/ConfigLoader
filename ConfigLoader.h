@@ -1,4 +1,4 @@
-#include <stdlib.h>
+#pragma once
 
 typedef struct {
     #define SETTING(STR, DEFAULT) typeof(DEFAULT) STR;
@@ -7,5 +7,4 @@ typedef struct {
 } Config_t;
 
 void InitConfig(Config_t* c, const char* configfile);
-
-// void ConfigReader(Config_t* c, const char *file, void (*func)(const char*));
+void PrintConfig(Config_t *c);
