@@ -108,7 +108,7 @@ int map_set(HashMap_t *handle[static 1], const char *key, const char *val)
 		}
 
 		// Update existing key
-		if (strcmp(e->key, key) == 0)
+		if (hash(e->key) == idx)
 		{
 			strncpy(e->value, val, sizeof(e->value));
 			e->value[VAL_LEN - 1] = '\0';
@@ -136,7 +136,7 @@ Entry_t *map_get(HashMap_t *m, const char *key)
 			return NULL;
 		};
 
-		if (e->status == ISUSED && strcmp(e->key, key) == 0)
+		if ((e->status == ISUSED) && (hash(e->key) == idx))
 			return e;
 	}
 
@@ -157,11 +157,9 @@ int map_delete(HashMap_t *m, const char *key)
 			return 0;
 		}
 
-		else if (strcmp(e->key, key) == 0)
+		else if (hash(e->key) == idx)
 		{
 			e->status = DELETED;
-			// for (size_t i = 0; i < VAL_LEN; i++)
-			// 	e->value[i] = '\0';
 			e->value[0] = '\0';
 			m->size--;
 			return 1;
