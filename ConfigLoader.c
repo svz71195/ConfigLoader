@@ -303,7 +303,6 @@ void InitConfig(Config_t *c, const char *configFile)
 {
     // Intermediate structure to store key/vlaue pairs
     HashMap_t *m = ReadConfigFile(configFile);
-    map_print(m);
 
 // Conversion of char* value to expected type based
 // on type of the default value in 'Settings.def'
