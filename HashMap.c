@@ -4,15 +4,15 @@
 
 #include "HashMap.h"
 
-
 /**
  * @brief FNV-1a 32 bit hash function for fast index computation
- * @param key const char*: byte stream to compute hash for   
+ * @param key const char*: byte stream to compute hash for
  */
-static size_t hash(const char* key)
+static size_t hash(const char *key)
 {
 	size_t h = 2166136261u;
-	while (*key) {
+	while (*key)
+	{
 		h ^= (unsigned char)*key++;
 		h *= 16777619u;
 	}
@@ -26,46 +26,46 @@ static size_t hash(const char* key)
  * @param m HashMap to resize
  * @param new_capacity
  */
-static HashMap_t* map_resize(HashMap_t* m, size_t new_capacity)
+static HashMap_t *map_resize(HashMap_t *m, size_t new_capacity)
 {
-	printf("Map Resize triggered...\n");
-	// map_print(m);
-	HashMap_t* new = {0};
+	HashMap_t *new = {0};
 	map_init(&new, new_capacity);
-	// map_print(new);	
 
-	for (size_t i = 0; i < m->capacity; i++) {
-		if (m->table[i].in_use) {
+	for (size_t i = 0; i < m->capacity; i++)
+	{
+		if (m->table[i].status == ISUSED)
+		{
 			// reinsert into new table
 			map_set(&new, m->table[i].key, m->table[i].value);
 		}
 	}
 
-	free(m);
-	printf("End of resize...\n");
+	map_free(m);
 
-	return new;  // success
+	return new; // success
 }
 
-
-int map_init(HashMap_t* handle[static 1], size_t capacity)
+int map_init(HashMap_t *handle[static 1], size_t capacity)
 {
 	// ensure one contiguous block of memory and less memory fragmentation
-	if (*handle != NULL) { return 0; }
+	if (*handle != NULL)
+	{
+		return 0;
+	}
 
 	capacity = capacity <= 0 ? INITIAL_CAPACITY : capacity;
 
 	*handle = malloc(sizeof(**handle) + sizeof(Entry_t[capacity]));
 
-	if (*handle != NULL) {
-		**handle = (HashMap_t){ .capacity = capacity };
+	if (*handle != NULL)
+	{
+		**handle = (HashMap_t){.capacity = capacity};
 	}
 
 	return 1;
 }
 
-
-void map_free(HashMap_t* m)
+void map_free(HashMap_t *m)
 {
 	// For this specific implementation, we used a single malloc
 	// with the flexible array member, we technically don't need a seperate function
@@ -73,39 +73,43 @@ void map_free(HashMap_t* m)
 	free(m);
 }
 
-
-int map_set(HashMap_t* handle[static 1], const char* key, const char* val)
+int map_set(HashMap_t *handle[static 1], const char *key, const char *val)
 {
-	HashMap_t* m = *handle;
-	
-	if ((m->size + 1) >= (size_t)(m->capacity * FILL_FACTOR)) {
+	HashMap_t *m = *handle;
+
+	if ((m->size + 1) >= (size_t)(m->capacity * FILL_FACTOR))
+	{
 		*handle = m = map_resize(m, m->capacity * 2);
-		if (!m) {
+		if (!m)
+		{
 			return 0;
 		}
 	}
 
 	size_t idx = hash(key);
 
-	for (size_t i = 0; i < m->capacity; i++) {
+	for (size_t i = 0; i < m->capacity; i++)
+	{
 		size_t probe = (idx + i) % m->capacity;
-		Entry_t* e = &m->table[probe];
+		Entry_t *e = &m->table[probe];
 
 		// Insert in unused slot
-		if (!e->in_use) {
+		if (e->status != ISUSED)
+		{
 			strncpy(e->key, key, sizeof(e->key));
 			e->key[KEY_LEN - 1] = '\0';
 			// printf("e->key %s | key %s | ", e->key, key);
 			strncpy(e->value, val, sizeof(e->value));
 			e->value[VAL_LEN - 1] = '\0';
 			// printf("e->val %s | val %s\n", e->value, val);
-			e->in_use = 1;
+			e->status = ISUSED;
 			m->size++;
 			return 1;
 		}
 
 		// Update existing key
-		if (strcmp(e->key, key) == 0) {
+		if (strcmp(e->key, key) == 0)
+		{
 			strncpy(e->value, val, sizeof(e->value));
 			e->value[VAL_LEN - 1] = '\0';
 			return 1;
@@ -116,61 +120,65 @@ int map_set(HashMap_t* handle[static 1], const char* key, const char* val)
 	return 0;
 }
 
-
-Entry_t* map_get(HashMap_t* m, const char* key)
+Entry_t *map_get(HashMap_t *m, const char *key)
 {
 	size_t idx = hash(key);
 
-	for (size_t i = 0; i < m->capacity; i++) {
+	for (size_t i = 0; i < m->capacity; i++)
+	{
 		size_t probe = (idx + i) % m->capacity;
-		// printf("idx = %ld ...",probe);
-		// fflush(stdout);
-		Entry_t* e = &m->table[probe];
+		Entry_t *e = &m->table[probe];
 
 		// Could happen, if entry was deleted
 		// A different key matching this index can now overwrite
-		if (!e->in_use) {
+		if (e->status == UNUSED)
+		{
 			return NULL;
 		};
 
-		if (e->in_use && strcmp(e->key, key) == 0)
+		if (e->status == ISUSED && strcmp(e->key, key) == 0)
 			return e;
 	}
 
 	return NULL;
 }
 
-
-int map_delete(HashMap_t* m, const char* key)
+int map_delete(HashMap_t *m, const char *key)
 {
 	size_t idx = hash(key);
 
-	for (size_t i = 0; i < m->capacity; i++) {
+	for (size_t i = 0; i < m->capacity; i++)
+	{
 		size_t probe = (idx + i) % m->capacity;
-		Entry_t* e = &m->table[probe];
+		Entry_t *e = &m->table[probe];
 
-		if (!e->in_use) {
+		if (e->status != ISUSED)
+		{
 			return 0;
 		}
 
-		if (e->in_use && strcmp(e->key, key) == 0) {
-			e->in_use = 0;
-			for (size_t i = 0; i<VAL_LEN; i++) e->value[i] = '\0';
+		else if (strcmp(e->key, key) == 0)
+		{
+			e->status = DELETED;
+			// for (size_t i = 0; i < VAL_LEN; i++)
+			// 	e->value[i] = '\0';
+			e->value[0] = '\0';
 			m->size--;
 			return 1;
 		}
 	}
-	return 0;  // Deletion failed
+	return 0; // Deletion failed
 }
 
-void map_print(HashMap_t* m)
+void map_print(HashMap_t *m)
 {
 	puts("--- Contents of map ---");
 	printf("|cap = %lu | size = %lu|\n", m->capacity, m->size);
 
-	for(size_t i = 0; i < m->capacity; i++)
+	for (size_t i = 0; i < m->capacity; i++)
 	{
-		if (m->table[i].in_use) {
+		if (m->table[i].status == ISUSED)
+		{
 			printf("%lu '%.*s': '%.*s'\n", i, (int)KEY_LEN, m->table[i].key, (int)VAL_LEN, m->table[i].value);
 		}
 	}
