@@ -1,9 +1,23 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include <ctype.h>
 
 #include "ConfigLoader.h"
 #include "HashMap.h"
+
+void strtrim(char *s)
+{
+    size_t len = strlen(s);
+    size_t lw = 0;
+    while ((len > 0) && isspace(s[len - 1]))
+        --len;
+    s[len] = 0;
+    while (isspace(s[lw]))
+        ++lw;
+    if (lw > 0)
+        memmove(s, s + lw, len + 1 - lw);
+}
 
 HashMap_t *ReadConfigFile(const char *file)
 {
@@ -23,13 +37,13 @@ HashMap_t *ReadConfigFile(const char *file)
 
     while (fgets(line, MAX_LINE_LEN, fd) != NULL)
     {
-        // strtrim(line);
+        strtrim(line);
         ++line_cnt;
         size_t len = strlen(line);
 
         char key[KEY_LEN], value[VAL_LEN];
 
-        if ((len <= 6) || (line[0] == '#') || (line[0] == ';'))
+        if ((len <= 0) || (line[0] == '#') || (line[0] == ';'))
             continue;
 
         /*
