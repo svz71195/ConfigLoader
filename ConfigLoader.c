@@ -86,15 +86,13 @@ static int _ValToInt(HashMap_t *m, const char *key, int *result)
         return 0;
     }
 
-    if (e->value[0] == '\0')
-    {
-        return 1;
-    }
-
     *result = strtol(e->value, &endptr, 10);
 
     if ((*endptr) != 0)
+    {
+        printf("Failed\n");
         return 0; /* did not parse entire string */
+    }
 
     printf("Success\n");
     fflush(stdout);
@@ -115,15 +113,13 @@ static int _ValToUnsignedInt(HashMap_t *m, const char *key, unsigned int *result
         return 0;
     }
 
-    if (e->value[0] == '\0')
-    {
-        return 1;
-    }
-
     *result = strtoul(e->value, &endptr, 10);
 
     if ((*endptr) != 0)
+    {
+        printf("Failed\n");
         return 0; /* did not parse entire string */
+    }
 
     printf("Success\n");
     fflush(stdout);
@@ -144,15 +140,13 @@ static int _ValToLongLong(HashMap_t *m, const char *key, long long *result)
         return 0;
     }
 
-    if (e->value[0] == '\0')
-    {
-        return 1;
-    }
-
     *result = strtoll(e->value, &endptr, 10);
 
     if ((*endptr) != 0)
+    {
+        printf("Failed\n");
         return 0; /* did not parse entire string */
+    }
 
     printf("Success\n");
     fflush(stdout);
@@ -173,15 +167,13 @@ static int _ValToUnsignedLongLong(HashMap_t *m, const char *key, unsigned long l
         return 0;
     }
 
-    if (e->value[0] == '\0')
-    {
-        return 1;
-    }
-
     *result = strtoull(e->value, &endptr, 10);
 
     if ((*endptr) != 0)
+    {
+        printf("Failed\n");
         return 0; /* did not parse entire string */
+    }
 
     printf("Success\n");
     fflush(stdout);
@@ -202,15 +194,13 @@ static int _ValToFloat(HashMap_t *m, const char *key, float *result)
         return 0;
     }
 
-    if (e->value[0] == '\0')
-    {
-        return 1;
-    }
-
     *result = strtof(e->value, &endptr);
 
     if ((*endptr) != 0)
+    {
+        printf("Failed\n");
         return 0; /* did not parse entire string */
+    }
 
     printf("Success\n");
     fflush(stdout);
@@ -231,15 +221,13 @@ static int _ValToDouble(HashMap_t *m, const char *key, double *result)
         return 0;
     }
 
-    if (e->value[0] == '\0')
-    {
-        return 1;
-    }
-
     *result = strtod(e->value, &endptr);
 
     if ((*endptr) != 0)
+    {
+        printf("Failed\n");
         return 0; /* did not parse entire string */
+    }
 
     printf("Success\n");
     fflush(stdout);
@@ -259,15 +247,15 @@ static int _ValToString(HashMap_t *m, const char *key, char **result)
         return 0;
     }
 
-    // if(e->value[0] == '\0') { return 1; }
-    *result = realloc(*result, VAL_LEN);
-    if (!(*result))
+    char *temp = realloc(*result, VAL_LEN);
+    if (!temp)
     {
         printf("Failed\n");
         fflush(stdout);
         return 0;
     }
 
+    *result = temp;
     strncpy(*result, e->value, VAL_LEN);
     printf("Success\n");
     fflush(stdout);
@@ -311,9 +299,9 @@ void InitConfig(Config_t *c, const char *configFile)
     if (!_Generic((DEFAULT),                            \
             int: _ValToInt,                             \
             unsigned int: _ValToUnsignedInt,            \
-            float: _ValToFloat,                         \
             long long: _ValToLongLong,                  \
             unsigned long long: _ValToUnsignedLongLong, \
+            float: _ValToFloat,                         \
             double: _ValToDouble,                       \
             default: _ValToString)(m, #STR, &(c->STR))) \
         (c->STR) = DEFAULT;
