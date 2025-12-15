@@ -275,7 +275,7 @@ static int _ValToString(HashMap_t *m, const char *key, char **result)
     return 1;
 }
 
-void PrintConfig(Config_t *c)
+void PrintConfig(const Config_t *c)
 {
     if (!c)
     {

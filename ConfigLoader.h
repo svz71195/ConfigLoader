@@ -7,4 +7,6 @@ typedef struct {
 } Config_t;
 
 void InitConfig(Config_t* c, const char* configfile);
-void PrintConfig(Config_t *c);
+void PrintConfig(const Config_t *c);
+
+extern Config_t settings;
