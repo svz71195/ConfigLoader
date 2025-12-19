@@ -304,7 +304,7 @@ void InitConfig(Config_t *c, const char *configFile)
             float: _ValToFloat,                         \
             double: _ValToDouble,                       \
             default: _ValToString)(m, #STR, &(c->STR))) \
-        (c->STR) = DEFAULT;
+        (c->STR) = DEFAULT; // TODO what about implicit conversions (e.g. int to uint)
 
 #include "Settings.def"
 #undef SETTING
